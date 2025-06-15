@@ -1,4 +1,4 @@
-## User CRUD App
+# User CRUD App
 
 A simple full-stack CRUD application using Spring Boot and HTML.
 
