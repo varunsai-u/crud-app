@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRUD frontend</title>
+  </head>
+  <body>
+    <h1 id="h1">User Manager</h1>
+    <form>
+      <label for="em">email:</label>
+      <input type="email" id="em" placeholder="Enter your email" required />
+      <label for="name">name:</label>
+      <input type="text" id="name" placeholder="Enter your name" />
+      <br />
+      <button id="create" type="button" onclick="myfun1()">create</button>
+      <br />
+      <button id="read" type="button" onclick="myfun2()">read</button>
+      <br />
+      <button id="readall" type="button" onclick="myfun5()">read all</button>
+      <br />
+      <button id="update" type="button" onclick="myfun3()">update</button>
+      <br />
+      <button id="delete" type="button" onclick="myfun4()">delete</button>
+    </form>
+    <h2 id="result"></h2>
+    <table id="userTable" border="1"></table>
+    <script>
+      function myfun1() {
+        document.getElementById("userTable").innerHTML = "";
+        document.getElementById("result").innerText = "";
+        let a = document.getElementById("name").value;
+        let b = document.getElementById("em").value;
+        if (!a || !b) {
+          document.getElementById("result").innerText =
+            "Please enter both name and email.";
+          return;
+        }
+
+        fetch("http://localhost:8080/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: a,
+            email: b,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("User creation failed");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            document.getElementById("result").innerHTML =
+              "user created successfully";
+            document.getElementById("name").value = "";
+            document.getElementById("em").value = "";
+          })
+          .catch((error) => {
+            document.getElementById("result").innerHTML = error.message;
+          });
+      }
+      function myfun2() {
+        document.getElementById("userTable").innerHTML = "";
+        document.getElementById("result").innerText = "";
+        let b = document.getElementById("em").value;
+        fetch(`http://localhost:8080/api/users/email/${b}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("user not found");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            document.getElementById("name").value = "";
+            document.getElementById("em").value = "";
+            console.log(data);
+            document.getElementById(
+              "result"
+            ).innerHTML = `Name: ${data.name}, Email: ${data.email}`;
+          })
+          .catch((error) => {
+            document.getElementById("result").innerHTML = error.message;
+          });
+      }
+      function myfun5() {
+        document.getElementById("userTable").innerHTML = "";
+        document.getElementById("result").innerText = "";
+        fetch("http://localhost:8080/api/users")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("name").value = "";
+            document.getElementById("em").value = "";
+            if (data.length === 0) {
+              document.getElementById("result").innerText = "No users found.";
+              return;
+            }
+            let y = document.getElementById("userTable");
+            y.innerHTML = "<tr><th>ID</th><th>Name</th><th>Email</th></tr>";
+            data.forEach((user) => {
+              y.innerHTML += `<tr><td>${user.id}</td><td>${user.name}</td><td>${user.email}</td></tr>`;
+            });
+          });
+      }
+      function myfun3() {
+        document.getElementById("userTable").innerHTML = "";
+        document.getElementById("result").innerText = "";
+        let a = document.getElementById("name").value;
+        let b = document.getElementById("em").value;
+        if (!a || !b) {
+          document.getElementById("result").innerText =
+            "Please enter both name and email.";
+          return;
+        }
+        fetch(`http://localhost:8080/api/users/email/${b}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: a,
+            email: b,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("user not updated");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            document.getElementById("name").value = "";
+            document.getElementById("em").value = "";
+            console.log(data);
+            document.getElementById("result").innerHTML =
+              "User updated successfully";
+          })
+          .catch((error) => {
+            document.getElementById("result").innerHTML = error.message;
+          });
+      }
+      function myfun4() {
+        document.getElementById("userTable").innerHTML = "";
+        document.getElementById("result").innerText = "";
+        let b = document.getElementById("em").value;
+        fetch(`http://localhost:8080/api/users/email/${b}`, {
+          method: "DELETE",
+        })
+          .then((response) => {
+            document.getElementById("name").value = "";
+            document.getElementById("em").value = "";
+            if (response.status === 204) {
+              document.getElementById("result").innerText =
+                "User deleted successfully";
+            } else if (response.status === 404) {
+              throw new Error("User not found");
+            } else {
+              throw new Error("Unexpected error");
+            }
+          })
+
+          .catch((error) => {
+            document.getElementById("result").innerHTML = error.message;
+          });
+      }
+    </script>
+  </body>
+</html>
